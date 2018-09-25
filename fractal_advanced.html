@@ -1,0 +1,115 @@
+<!doctype html>
+<html>
+	<head>
+		<title>Fractal</title>
+		<meta charset='utf-8' />
+		<style type="text/css">
+			#canvas {
+				display: block;
+				border: 15px solid gold;
+				border-radius: 30px;
+				margin: 20px auto;
+				height: 500px;
+				width: 800px;
+			}
+		</style>
+	</head>
+	<body>
+		<canvas id='canvas'></canvas>
+		<script>
+			let canvas = document.getElementById("canvas");
+			let ctx = canvas.getContext("2d");
+			canvas.width = 800;
+			canvas.height = 500;
+
+			let settings = {
+				curAngle: -90,
+				angleDegrees: 10,
+				lineLength: 3,
+				lineWidth: 1,
+				stateStack: [],
+				point: {
+					x: 50,
+					y: 450
+				}
+			}
+
+			function getRandomColor() {
+				var rez = Math.floor(Math.random() * (255 - 1));
+				console.log(rez);
+				return rez;
+			}
+
+			function draw(instruction, settings, iteration) {
+				ctx.strokeStyle = "rgb( " + getRandomColor() + ", " + getRandomColor() + " , " + getRandomColor() + ")";
+				ctx.beginPath();
+				ctx.moveTo(settings.point.x, settings.point.y);
+				ctx.lineWidth = settings.lineWidth;
+
+
+				for (let i = 0; i < instruction.length; i++) {
+					if (instruction[i] == "+") {
+						settings.curAngle += settings.angleDegrees;
+						continue;
+					}
+
+					if (instruction[i] == "-") {
+						settings.curAngle -= settings.angleDegrees;
+						continue;
+					}
+
+					if (instruction[i] == "[") {
+						settings.stateStack.push({
+							x: settings.point.x,
+							y: settings.point.y, 
+							angle: settings.curAngle});
+						continue;
+					}
+
+					if (instruction[i] == "]") {
+						var curSets = settings.stateStack.pop();
+						settings.curAngle = curSets.angle;
+						settings.point.x = curSets.x;
+						settings.point.y = curSets.y;
+						ctx.moveTo(settings.point.x, settings.point.y);
+						continue;
+					}
+
+					if (instruction[i] == "F") {
+						settings.point.x = settings.point.x + (settings.lineLength * Math.cos(settings.curAngle/180*Math.PI));
+						settings.point.y = settings.point.y + (settings.lineLength * Math.sin(settings.curAngle/180*Math.PI));
+						
+						ctx.lineTo(settings.point.x, settings.point.y);
+						ctx.stroke();
+						continue;
+					}
+
+					if (instruction[i] == "W" && iteration > 0) {
+			            draw("YF++ZF----XF[-YF----WF]++", settings, iteration - 1);
+			            continue;
+			          }
+
+			          if (instruction[i] == "Z" && iteration > 0) {
+			            draw("--YF++++WF[+ZF++++XF]-XF", settings, iteration - 1);
+			            continue;
+			          }          
+
+			          if (instruction[i] == "X" && iteration > 0) {
+			            draw("+YF--ZF[---WF--XF]+", settings, iteration - 1);
+			            continue;
+			          }
+
+			          if (instruction[i] == "Y" && iteration > 0) {
+			            draw("-WF++XF[+++YF++ZF]-", settings, iteration - 1);
+			            continue;
+			          }
+			        }
+
+			        //ctx.closePath();
+			      }
+
+     		draw("+WF--XF---YF--ZF", settings, 4);
+
+		</script>
+	</body>
+</html>
